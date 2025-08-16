@@ -1,7 +1,9 @@
 #!/bin/bash
 
-# Dominio objetivo
-DOMINIO="https://www.viva.com.bo"
+# Pedir al usuario que ingrese el dominio
+read -p "🌐 Ingresa el dominio o subdominio (ej: www.viva.com.bo): " DOMINIO
+
+# Nombre del archivo de salida
 SALIDA="colaboradores.txt"
 
 echo "📡 Extrayendo colaboradores de $DOMINIO ..."
