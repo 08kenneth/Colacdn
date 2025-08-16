@@ -1,7 +1,14 @@
 #!/bin/bash
 
 # Pedir al usuario que ingrese el dominio
-read -p "🌐 Ingresa el dominio o subdominio (ej: www.viva.com.bo): " DOMINIO
+read -p "🌐 Ingresa el dominio o subdominio (ej: www.viva.com.bo): " INPUT
+
+# Asegurarse que tenga https:// al inicio
+if [[ $INPUT != http* ]]; then
+    DOMINIO="https://$INPUT"
+else
+    DOMINIO="$INPUT"
+fi
 
 # Nombre del archivo de salida
 SALIDA="colaboradores.txt"
