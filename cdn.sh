@@ -9,42 +9,69 @@ if [ ! -f /data/data/com.termux/files/usr/bin/cdn ]; then
 fi
 # --- Fin de auto-instalación ---
 
-# Pedir al usuario que ingrese dominio o IP
-read -p "🌐 Ingresa el dominio o IP (ej: www.jenken-vpn.com o 127.0.0.1): " INPUT
+clear
+echo "=========================================="
+echo "          🔹 MENU CDN 🔹"
+echo "=========================================="
+echo "1) Extraer sub - o dominios de colaboradores"
+echo "2) Extraer sub - o dominios asociados a una IP"
+echo "0) Salir"
+echo "=========================================="
+read -p "Selecciona una opción: " OPCION
 
-# Comprobar si es IP
-if [[ $INPUT =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-    # Intentar HTTP y HTTPS
-    URLS_HTTP=$(curl -s -D - "http://$INPUT" -o /dev/null)
-    URLS_HTTPS=$(curl -s -D - "https://$INPUT" -o /dev/null)
-    HTML_HTTP=$(curl -s "http://$INPUT")
-    HTML_HTTPS=$(curl -s "https://$INPUT")
-    DATA="$URLS_HTTP $URLS_HTTPS $HTML_HTTP $HTML_HTTPS"
-else
-    # Para dominio, asegurar https://
-    if [[ $INPUT != http* ]]; then
-        DOMINIO="https://$INPUT"
-    else
-        DOMINIO="$INPUT"
-    fi
-    DATA=$(curl -s -D - "$DOMINIO" -o /dev/null)
-    HTML=$(curl -s "$DOMINIO")
-    DATA="$DATA $HTML"
-fi
+case $OPCION in
+    1)
+        read -p "🌐 Ingresa el sub - o dominio (ej: www.jenken.com): " INPUT
+        if [[ $INPUT != http* ]]; then
+            DOMINIO="https://$INPUT"
+        else
+            DOMINIO="$INPUT"
+        fi
+        SALIDA="cdn.txt"
 
-# Extraer URLs que empiecen con http o https
-URLS=$(echo "$DATA" | grep -Eo 'https?://[^" ]+')
+        echo "📡 Escaneando sub - o dominios de $DOMINIO ..."
 
-# Limpiar y extraer solo dominios/subdominios
-DOMINIOS=$(echo "$URLS" | sed -E 's#https?://##' | sed -E 's#/.*##' | sort -u)
+        DATA=$(curl -s -D - "$DOMINIO" -o /dev/null)
+        HTML=$(curl -s "$DOMINIO")
+        DATA="$DATA $HTML"
 
-# Guardar en archivo
-SALIDA="cdn.txt"
-echo "$DOMINIOS" > "$SALIDA"
+        URLS=$(echo "$DATA" | grep -Eo 'https?://[^\" ]+')
+        DOMINIOS=$(echo "$URLS" | sed -E 's#https?://##' | sed -E 's#/.*##' | sort -u)
 
-# Mostrar resultados
-echo "✅ Empresas colaboradoras detectadas y guardadas en $SALIDA"
-echo "----------------------------------------"
-cat "$SALIDA"
-echo "----------------------------------------"
-echo "Total detectadas: $(wc -l < "$SALIDA")"
+        echo "$DOMINIOS" > "$SALIDA"
+
+        echo "✅ Sub - o dominios detectados y guardados en $SALIDA"
+        echo "----------------------------------------"
+        cat "$SALIDA"
+        echo "----------------------------------------"
+        echo "Total detectados: $(wc -l < "$SALIDA")"
+        ;;
+    2)
+        read -p "🌐 Ingresa la IP (ej: 127.0.0.1): " IP
+
+        echo "🔎 Buscando sub - o dominios asociados a $IP ..."
+
+        RESPONSE=$(curl -s -X POST \
+            -d "remoteAddress=$IP" \
+            -d "key=" \
+            https://domains.yougetsignal.com/domains.php)
+
+        DOMINIOS=$(echo "$RESPONSE" | grep -oP '"domain":"\K[^"]+')
+        SALIDA="cdn_ip.txt"
+        echo "$DOMINIOS" > "$SALIDA"
+
+        echo "✅ Sub - o dominio asociados guardados en $SALIDA"
+        echo "----------------------------------------"
+        cat "$SALIDA"
+        echo "----------------------------------------"
+        echo "Total detectados: $(wc -l < "$SALIDA")"
+        ;;
+    0)
+        echo "Saliendo..."
+        exit 0
+        ;;
+    *)
+        echo "Opción inválida"
+        exit 1
+        ;;
+esac
