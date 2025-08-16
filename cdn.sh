@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# --- Auto-instalación como comando global 'cdn' ---
+if [ ! -f /data/data/com.termux/files/usr/bin/cdn ]; then
+    echo "📌 Instalando comando global 'cdn'..."
+    cp "$0" /data/data/com.termux/files/usr/bin/cdn
+    chmod +x /data/data/com.termux/files/usr/bin/cdn
+    echo "✅ Comando 'cdn' instalado. Ahora puedes ejecutarlo desde cualquier lugar con: cdn"
+fi
+# --- Fin de auto-instalación ---
+
 # Pedir al usuario que ingrese el dominio
 read -p "🌐 Ingresa el dominio o subdominio (ej: www.viva.com.bo): " INPUT
 
