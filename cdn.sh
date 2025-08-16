@@ -1,9 +1,7 @@
-#!/bin/bash
-
 main_menu() {
     clear
     echo "=========================================="
-    echo "          🔹 MENU CDN 4.0 🔹"
+    echo "          🔹 MENU CDN 2.0 🔹"
     echo "=========================================="
     echo "1) Extraer sub - o dominios de colaboradores"
     echo "2) Extraer sub - o dominios asociados a una IP"
@@ -33,7 +31,11 @@ main_menu() {
 # Función para escanear subdominios de dominio
 escanear_dominios() {
     read -p "🌐 Ingresa el sub - o dominio (ej: www.jenken.com): " INPUT
-    [[ $INPUT != http* ]] && DOMINIO="https://$INPUT" || DOMINIO="$INPUT"
+    if [[ $INPUT != http* ]]; then
+        DOMINIO="https://$INPUT"
+    else
+        DOMINIO="$INPUT"
+    fi
     SALIDA="cdn.txt"
 
     echo "📡 Escaneando sub - o dominios de $DOMINIO ..."
@@ -61,6 +63,7 @@ ip_reverse() {
     read -p "🌐 Ingresa la IP (ej: 127.0.0.1): " IP
     echo "🔎 Buscando sub - o dominios asociados a $IP ..."
 
+    # Usamos una API alternativa de reverse IP (hackertarget.com)
     RESPONSE=$(curl -s "https://api.hackertarget.com/reverseiplookup/?q=$IP")
 
     if [[ "$RESPONSE" == *"error"* ]] || [[ -z "$RESPONSE" ]]; then
@@ -78,10 +81,10 @@ ip_reverse() {
     main_menu
 }
 
-# --- Auto-instalación como comando global 'jenken' ---
-if [ ! -f /data/data/com.termux/files/usr/bin/jenken ]; then
-    cp "$0" /data/data/com.termux/files/usr/bin/jenken
-    chmod +x /data/data/com.termux/files/usr/bin/jenken
+# --- Auto-instalación como comando global 'cdn' ---
+if [ ! -f /data/data/com.termux/files/usr/bin/cdn ]; then
+    cp "$0" /data/data/com.termux/files/usr/bin/cdn
+    chmod +x /data/data/com.termux/files/usr/bin/cdn
 fi
 
 # Ejecutar menú
