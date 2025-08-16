@@ -11,7 +11,7 @@ else
 fi
 
 # Nombre del archivo de salida
-SALIDA="colaboradores.txt"
+SALIDA="cdn.txt"
 
 echo "📡 Extrayendo colaboradores de $DOMINIO ..."
 
