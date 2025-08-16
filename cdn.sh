@@ -10,7 +10,7 @@ fi
 # --- Fin de auto-instalación ---
 
 # Pedir al usuario que ingrese el dominio
-read -p "🌐 Ingresa el dominio o subdominio (ej: www.viva.com.bo): " INPUT
+read -p "🌐 Ingresa el dominio o subdominio (ej: www.jenken.com): " INPUT
 
 # Asegurarse que tenga https:// al inicio
 if [[ $INPUT != http* ]]; then
