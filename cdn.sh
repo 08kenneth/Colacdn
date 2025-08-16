@@ -1,13 +1,9 @@
 #!/bin/bash
 
-# Función para colorear en verde
-verde() { echo -e "\033[1;32m$1\033[0m"; }
-
-# Menú principal
 main_menu() {
     clear
     echo "=========================================="
-    echo "          🔹 MENU CDN 3.0 🔹"
+    echo "          🔹 MENU CDN 4.0 🔹"
     echo "=========================================="
     echo "1) Extraer sub - o dominios de colaboradores"
     echo "2) Extraer sub - o dominios asociados a una IP"
@@ -34,7 +30,7 @@ main_menu() {
     esac
 }
 
-# Función para escanear subdominios
+# Función para escanear subdominios de dominio
 escanear_dominios() {
     read -p "🌐 Ingresa el sub - o dominio (ej: www.jenken.com): " INPUT
     [[ $INPUT != http* ]] && DOMINIO="https://$INPUT" || DOMINIO="$INPUT"
@@ -60,10 +56,10 @@ escanear_dominios() {
     main_menu
 }
 
-# Función para reverse IP + mostrar servidor
+# Función para reverse IP
 ip_reverse() {
     read -p "🌐 Ingresa la IP (ej: 127.0.0.1): " IP
-    echo "🔎 Buscando dominios asociados a $IP ..."
+    echo "🔎 Buscando sub - o dominios asociados a $IP ..."
 
     RESPONSE=$(curl -s "https://api.hackertarget.com/reverseiplookup/?q=$IP")
 
@@ -71,14 +67,10 @@ ip_reverse() {
         echo "❌ No se encontraron dominios asociados o la API falló."
     else
         SALIDA="cdn_ip.txt"
-        echo "Dominio - Servidor" > "$SALIDA"
-        for d in $(echo "$RESPONSE" | sort -u); do
-            SERVER=$(curl -sI "http://$d" | grep -i "Server:" | head -n1 | cut -d" " -f2-)
-            [[ -z "$SERVER" ]] && SERVER="Desconocido"
-            echo "$d - $(verde "$SERVER")" | tee -a "$SALIDA"
-        done
-
-        echo "✅ Dominios asociados guardados en $SALIDA"
+        echo "$RESPONSE" | sort -u > "$SALIDA"
+        echo "✅ Sub - o dominios asociados guardados en $SALIDA"
+        echo "----------------------------------------"
+        cat "$SALIDA"
         echo "----------------------------------------"
         echo "Total detectados: $(wc -l < "$SALIDA")"
     fi
@@ -86,10 +78,10 @@ ip_reverse() {
     main_menu
 }
 
-# --- Auto-instalación como comando global 'cdn' ---
-if [ ! -f /data/data/com.termux/files/usr/bin/cdn ]; then
-    cp "$0" /data/data/com.termux/files/usr/bin/cdn
-    chmod +x /data/data/com.termux/files/usr/bin/cdn
+# --- Auto-instalación como comando global 'jenken' ---
+if [ ! -f /data/data/com.termux/files/usr/bin/jenken ]; then
+    cp "$0" /data/data/com.termux/files/usr/bin/jenken
+    chmod +x /data/data/com.termux/files/usr/bin/jenken
 fi
 
 # Ejecutar menú
