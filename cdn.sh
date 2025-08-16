@@ -9,35 +9,37 @@ if [ ! -f /data/data/com.termux/files/usr/bin/cdn ]; then
 fi
 # --- Fin de auto-instalación ---
 
-# Pedir al usuario que ingrese el dominio
-read -p "🌐 Ingresa el dominio o subdominio (ej: www.jenken.com): " INPUT
+# Pedir al usuario que ingrese dominio o IP
+read -p "🌐 Ingresa el dominio o IP (ej: www.jenken-vpn.com o 127.0.0.1): " INPUT
 
-# Asegurarse que tenga https:// al inicio
-if [[ $INPUT != http* ]]; then
-    DOMINIO="https://$INPUT"
+# Comprobar si es IP
+if [[ $INPUT =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    # Intentar HTTP y HTTPS
+    URLS_HTTP=$(curl -s -D - "http://$INPUT" -o /dev/null)
+    URLS_HTTPS=$(curl -s -D - "https://$INPUT" -o /dev/null)
+    HTML_HTTP=$(curl -s "http://$INPUT")
+    HTML_HTTPS=$(curl -s "https://$INPUT")
+    DATA="$URLS_HTTP $URLS_HTTPS $HTML_HTTP $HTML_HTTPS"
 else
-    DOMINIO="$INPUT"
+    # Para dominio, asegurar https://
+    if [[ $INPUT != http* ]]; then
+        DOMINIO="https://$INPUT"
+    else
+        DOMINIO="$INPUT"
+    fi
+    DATA=$(curl -s -D - "$DOMINIO" -o /dev/null)
+    HTML=$(curl -s "$DOMINIO")
+    DATA="$DATA $HTML"
 fi
-
-# Nombre del archivo de salida
-SALIDA="cdn.txt"
-
-echo "📡 Extrayendo colaboradores de $DOMINIO ..."
-
-# Descargar la página y cabeceras
-DATA=$(curl -s -D - "$DOMINIO" -o /dev/null)
-
-# Agregar contenido HTML también
-HTML=$(curl -s "$DOMINIO")
-DATA="$DATA $HTML"
 
 # Extraer URLs que empiecen con http o https
 URLS=$(echo "$DATA" | grep -Eo 'https?://[^" ]+')
 
-# Limpiar y extraer solo dominios
+# Limpiar y extraer solo dominios/subdominios
 DOMINIOS=$(echo "$URLS" | sed -E 's#https?://##' | sed -E 's#/.*##' | sort -u)
 
 # Guardar en archivo
+SALIDA="cdn.txt"
 echo "$DOMINIOS" > "$SALIDA"
 
 # Mostrar resultados
